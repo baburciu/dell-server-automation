@@ -2,6 +2,7 @@
 #  - Service tag = Serial Number of Dell server
 #  - Server model
 #  - Part number for the server system board
+#  - Number of vCPUs = logical processors, by formula Threads x Cores x pCPU
 #  - Number of processor cores
 #  - Total number of RAM in all DIMM slots
 #  - MAC addresses & names of the 25G NICs
@@ -47,13 +48,25 @@
     ansible.builtin.debug:
       msg: '{{ idrac_inventory["ansible_facts"]["127.0.0.1"]["SystemInventory"]["System"][0]["BoardPartNumber"] }}'      
 
+  - name: Calculate amount of vCPU by formula Threads x Cores x Physical CPU
+    set_fact:
+      # calculate product of Threads & Cores for each pCPU, then add to a sum defaulted to 0
+      total_vcpu: '{{ total_vcpu |default(0) |int + ( (item["NumberOfEnabledThreads"] |int) * (item["NumberOfEnabledCores"] |int) ) }}'
+    loop: '{{ idrac_inventory["ansible_facts"]["127.0.0.1"]["SystemInventory"]["CPU"] | list }}'
+    no_log: true
+
+  - name: Print number of vCPUs
+    ansible.builtin.debug:
+      msg: '{{ total_vcpu }}'               
+
   - name: Print inventory CPU Cores
     ansible.builtin.debug:
       msg: '{{ idrac_inventory["ansible_facts"]["127.0.0.1"]["SystemInventory"]["CPU"][0]["NumberOfProcessorCores"] }}'  
 
   - name: Calculate sum of RAM capacity in all DIMM slots
     set_fact:
-      total_ram: '{{ sum|default(0)|int + item["Size"].split(" ")[0] |int }}'
+      # split by space the Size value for each DIMM, element of the "Memory" key in dictionary, like "16.0 GB", and get interger part, then add to a sum defaulted to 0
+      total_ram: '{{ total_ram |default(0) |int + item["Size"].split(" ")[0] |int }}'
     loop: '{{ idrac_inventory["ansible_facts"]["127.0.0.1"]["SystemInventory"]["Memory"] | list }}'
     no_log: true
 
@@ -64,19 +77,11 @@
       
   - name: Print sum of RAM Memory
     ansible.builtin.debug:
-      msg: '{{ total_ram }}'           
-
-  # - name: Collect 25G NICs MAC addresses & names
-  #   ansible.builtin.debug:
-  #     msg: 'MAC: {{ item["PermanentMACAddress"] }} - Name: {{ item["DeviceDescription"] }}'
-  #   when: 
-  #     - ' item["LinkSpeed"] == "25 Gbps"'
-  #   loop: '{{ idrac_inventory["ansible_facts"]["127.0.0.1"]["SystemInventory"]["NIC"] | list }}'
-  #   register: nics_inventory
-  #   no_log: true           
+      msg: '{{ total_ram }}'               
 
   - name: Get list of 25G NICs MAC addresses & names
     set_fact:
+      # create a list default to no elements, in which first element is the MAC and second is NIC name, for each NIC with Speed of 25G
       nics_list: "{{ nics_list | default([]) | union([item['PermanentMACAddress'], item['DeviceDescription']]) }}"
     when: 
       - ' item["LinkSpeed"] == "25 Gbps"'
