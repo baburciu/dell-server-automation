@@ -1,0 +1,33 @@
+## How to run:
+## boburciu@WX-5CG020BDT2:~/dell-ansible-automation$ ansible-playbook -i neo_hosts.yml --limit Dell_Ceph_server-1 get_service_tag.yml -e 'ansible_python_interpreter="/usr/bin/python3"' -v
+---
+- hosts: idrac
+  connection: local
+  name: Get system inventory
+  gather_facts: False
+
+  collections:
+    - dellemc.openmanage
+
+  tasks:
+  - name: Get system inventory
+    dellemc_get_system_inventory:
+       idrac_ip:   "{{ idrac_ip }}"
+       idrac_user: "{{ idrac_user }}"
+       idrac_password:  "{{ idrac_password }}"
+       idrac_port:   "{{ idrac_port }}"
+    register: idrac_inventory
+    no_log: true
+
+    #  - name: Print inventory variable
+    #    ansible.builtin.debug:
+    #      msg: '{{ idrac_inventory }}'
+
+  # - name: Print inventory System Service Tag
+  #   ansible.builtin.debug:
+  #     msg: '{{ idrac_inventory.keys() | list }}'
+
+  - name: Print inventory System Service Tag
+    ansible.builtin.debug:
+      msg: '{{ idrac_inventory["ansible_facts"]["127.0.0.1"]["SystemInventory"]["System"][0]["ServiceTag"] }}'
+
