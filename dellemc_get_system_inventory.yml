@@ -4,6 +4,7 @@
 #  - Part number for the server system board
 #  - Number of processor cores
 #  - Total number of RAM in all DIMM slots
+#  - MAC addresses & names of the 25G NICs
 
 ## How to run:
 ## boburciu@WX-5CG020BDT2:~/dell-ansible-automation$ ansible-playbook -i neo_hosts.yml --limit Dell_Ceph_server-1 dellemc_get_system_inventory.yml -e 'ansible_python_interpreter="/usr/bin/python3"' -v
@@ -52,10 +53,9 @@
 
   - name: Calculate sum of RAM capacity in all DIMM slots
     set_fact:
-      sum: '{{ sum|default(0)|int + item["Size"].split(" ")[0] |int }}'
-    loop: '{{ idrac_inventory["ansible_facts"]["127.0.0.1"]["SystemInventory"]["Memory"] | list }}'    
-    register: total_ram
-    no_log: true     
+      total_ram: '{{ sum|default(0)|int + item["Size"].split(" ")[0] |int }}'
+    loop: '{{ idrac_inventory["ansible_facts"]["127.0.0.1"]["SystemInventory"]["Memory"] | list }}'
+    no_log: true
 
   # - name: Print inventory Memory
   #   ansible.builtin.debug:
@@ -64,9 +64,28 @@
       
   - name: Print sum of RAM Memory
     ansible.builtin.debug:
-      msg: '{{ sum }}'           
+      msg: '{{ total_ram }}'           
 
+  # - name: Collect 25G NICs MAC addresses & names
+  #   ansible.builtin.debug:
+  #     msg: 'MAC: {{ item["PermanentMACAddress"] }} - Name: {{ item["DeviceDescription"] }}'
+  #   when: 
+  #     - ' item["LinkSpeed"] == "25 Gbps"'
+  #   loop: '{{ idrac_inventory["ansible_facts"]["127.0.0.1"]["SystemInventory"]["NIC"] | list }}'
+  #   register: nics_inventory
+  #   no_log: true           
 
+  - name: Get list of 25G NICs MAC addresses & names
+    set_fact:
+      nics_list: "{{ nics_list | default([]) | union([item['PermanentMACAddress'], item['DeviceDescription']]) }}"
+    when: 
+      - ' item["LinkSpeed"] == "25 Gbps"'
+    loop: '{{ idrac_inventory["ansible_facts"]["127.0.0.1"]["SystemInventory"]["NIC"] | list }}'
+    no_log: true    
+      
+  - name: Print 25G NICs MAC addresses & names
+    ansible.builtin.debug:
+      msg: '{{ nics_list }}'     
 
 
 ## Inventory returned:

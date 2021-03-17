@@ -1,8 +1,7 @@
-## Ansible playbooks usage for Dell server automation, based on Galaxy collection https://github.com/dell/dellemc-openmanage-ansible-modules
+# Ansible playbooks usage for Dell server automation, based on [Galaxy collection](https://github.com/dell/dellemc-openmanage-ansible-modules)
 
 ## 0. How to install Ansible Galaxy collection to correct path:
-
-boburciu@WX-5CG020BDT2:~$ ` ansible-config list | grep COLLECTIONS_PATHS -C1 ` # verify default location for the collections, so that the new modules can be read by Ansible cfg
+boburciu@WX-5CG020BDT2:~$ ` ansible-config list | grep COLLECTIONS_PATHS -C1 ` _# verify default location for the collections, so that the new modules can be read by Ansible cfg_
 ```
     Ansible version
 COLLECTIONS_PATHS:
@@ -15,32 +14,19 @@ COLLECTIONS_PATHS:
 boburciu@WX-5CG020BDT2:~$
 boburciu@WX-5CG020BDT2:~$
 ``` 
-boburciu@WX-5CG020BDT2:~$ ` ansible-galaxy collection install dellemc.openmanage  --collections-path ~/.ansible/collections ` # installing the collection of roles in proper location
-boburciu@WX-5CG020BDT2:~$ ` pip3 install omsdk --upgrade ` # installing Dell EMC OMSDK library 
+boburciu@WX-5CG020BDT2:~$ ` ansible-galaxy collection install dellemc.openmanage  --collections-path ~/.ansible/collections ` _#installing the collection of roles in proper location_
+boburciu@WX-5CG020BDT2:~$ ` pip3 install omsdk --upgrade ` _# installing Dell EMC OMSDK library_ 
 
 ## 1. How to run:
-boburciu@WX-5CG020BDT2: ~$ ` cd ~/dell-ansible-automation ` <br/>
+boburciu@WX-5CG020BDT2:~$ ` cd ~/dell-ansible-automation ` <br/>
 boburciu@WX-5CG020BDT2:~/dell-ansible-automation$  <br/>
-boburciu@WX-5CG020BDT2:~/dell-ansible-automation$ ` cat hosts.yml `  <br/>
+boburciu@WX-5CG020BDT2:~/dell-ansible-automation$ ` cat neo_hosts.yml `  <br/>
 ```
 [idrac]
-Dell_PowerEdge_R640,   idrac_ip='192.168.201.53',  idrac_user='root',  idrac_password='Orange123#'
-Dell_PowerEdge_7640,   idrac_ip='192.168.201.54',  idrac_user='root',  idrac_password='Orange123#'
-# docker_netbox_19216820023 ansible_host=192.168.200.23
+Dell_Control_server-3   idrac_ip='127.0.0.1'  idrac_port='44336'  idrac_user='root'  idrac_password='***********'
+Dell_Control_server-2   idrac_ip='127.0.0.1'  idrac_port='44337'  idrac_user='root'  idrac_password='***********'
+Dell_Control_server-1   idrac_ip='127.0.0.1'  idrac_port='44338'  idrac_user='root'  idrac_password='***********'
 
 ```
-boburciu@WX-5CG020BDT2:~/dell-ansible-automation$ ` ansible-playbook -i ./hosts.yml idrac_system_info.yml -v `  <br/>
-```
-Using /etc/ansible/ansible.cfg as config file
+boburciu@WX-5CG020BDT2:~/dell-ansible-automation$ ` ansible-playbook -i neo_hosts.yml --limit Dell_Ceph_server-1 dellemc_get_system_inventory.yml -e 'ansible_python_interpreter="/usr/bin/python3"' -v -v `  <br/>
 
-PLAY [Get system inventory] *****************************************************************************************
-
-TASK [Get system inventory.] ****************************************************************************************
-fatal: [Dell_PowerEdge_7640,]: FAILED! => {"ansible_facts": {"discovered_interpreter_python": "/usr/bin/python3"}, "changed": false, "msg": "Could not find device driver for iDRAC with IP Address: 192.168.201.54,"}
-fatal: [Dell_PowerEdge_R640,]: FAILED! => {"ansible_facts": {"discovered_interpreter_python": "/usr/bin/python3"}, "changed": false, "msg": "Could not find device driver for iDRAC with IP Address: 192.168.201.53,"}
-
-PLAY RECAP **********************************************************************************************************
-Dell_PowerEdge_7640,       : ok=0    changed=0    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0
-Dell_PowerEdge_R640,       : ok=0    changed=0    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0
-
-```
