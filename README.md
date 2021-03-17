@@ -14,13 +14,12 @@ COLLECTIONS_PATHS:
 boburciu@WX-5CG020BDT2:~$
 boburciu@WX-5CG020BDT2:~$
 ``` 
-boburciu@WX-5CG020BDT2:~$ ` ansible-galaxy collection install dellemc.openmanage  --collections-path ~/.ansible/collections ` _#installing the collection of roles in proper location_
-boburciu@WX-5CG020BDT2:~$ ` pip3 install omsdk --upgrade ` _# installing Dell EMC OMSDK library_ 
+boburciu@WX-5CG020BDT2:~$ ` ansible-galaxy collection install dellemc.openmanage  --collections-path ~/.ansible/collections ` _#installing the collection of roles in proper location_  <br/>
+boburciu@WX-5CG020BDT2:~$ ` pip3 install omsdk --upgrade ` _# installing Dell EMC OMSDK library_   <br/>
 
 ## 1. How to run:
 boburciu@WX-5CG020BDT2:~$ ` cd ~/dell-ansible-automation ` <br/>
-boburciu@WX-5CG020BDT2:~/dell-ansible-automation$  <br/>
-boburciu@WX-5CG020BDT2:~/dell-ansible-automation$ ` cat neo_hosts.yml `  <br/>
+boburciu@WX-5CG020BDT2:~/dell-ansible-automation$ ` cat neo_hosts.yml `
 ```
 [idrac]
 Dell_Control_server-3   idrac_ip='127.0.0.1'  idrac_port='44336'  idrac_user='root'  idrac_password='***********'
@@ -29,4 +28,3 @@ Dell_Control_server-1   idrac_ip='127.0.0.1'  idrac_port='44338'  idrac_user='ro
 
 ```
 boburciu@WX-5CG020BDT2:~/dell-ansible-automation$ ` ansible-playbook -i neo_hosts.yml --limit Dell_Ceph_server-1 dellemc_get_system_inventory.yml -e 'ansible_python_interpreter="/usr/bin/python3"' -v -v `  <br/>
-
