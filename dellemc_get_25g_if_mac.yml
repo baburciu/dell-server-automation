@@ -1,18 +1,10 @@
-## Ansible playbook that returns from iDRAC9's via REST API the:
-#  - Service tag = Serial Number of Dell server
-#  - Server model
-#  - Part number for the server system board
-#  - Number of vCPUs = logical processors, by formula Threads x Cores x pCPU # not needed
-#  - Number of processor cores
-#  - Total number of RAM in all DIMM slots
-#  - MAC addresses & names of the 25G NICs
 
 ## How to run:
-## boburciu@WX-5CG020BDT2:~/dell-ansible-automation$ ansible-playbook -i neo_hosts.yml --limit Dell_Ceph_server-1 dellemc_get_system_inventory.yml -e 'ansible_python_interpreter="/usr/bin/python3"' -v
+## boburciu@WX-5CG020BDT2:~/dell-ansible-automation$ ansible-playbook -i neo_hosts.yml --limit Dell_Ceph_server-1 dellemc_get_25g_if_mac.yml -e 'ansible_python_interpreter="/usr/bin/python3"' -v
 ---
 - hosts: idrac
   connection: local
-  name: Get system inventory
+  name: Get system inventory and return the MAC and name of 25G interfaces
   gather_facts: False
 
   collections:
@@ -28,73 +20,23 @@
     register: idrac_inventory
     no_log: true
 
-    #  - name: Print inventory variable
-    #    ansible.builtin.debug:
-    #      msg: '{{ idrac_inventory }}'
-
-  # - name: Print inventory System Service Tag
-  #   ansible.builtin.debug:
-  #     msg: '{{ idrac_inventory.keys() | list }}'
-
-  - name: Print inventory System Service Tag
-    ansible.builtin.debug:
-      msg: '{{ idrac_inventory["ansible_facts"]["127.0.0.1"]["SystemInventory"]["System"][0]["ServiceTag"] }}'
-
-  - name: Print inventory System Model
-    ansible.builtin.debug:
-      msg: '{{ idrac_inventory["ansible_facts"]["127.0.0.1"]["SystemInventory"]["System"][0]["Model"] }}'
-
-  - name: Print inventory System BoardPartNumber
-    ansible.builtin.debug:
-      msg: '{{ idrac_inventory["ansible_facts"]["127.0.0.1"]["SystemInventory"]["System"][0]["BoardPartNumber"] }}'      
-
-  # - name: Calculate amount of logical CPU by formula Threads x Cores x Physical CPU
-  #   set_fact:
-  #     # calculate product of Threads & Cores for each pCPU, then add to a sum defaulted to 0
-  #     total_vcpu: '{{ total_vcpu |default(0) |int + ( (item["NumberOfEnabledThreads"] |int) * (item["NumberOfEnabledCores"] |int) ) }}'
-  #   loop: '{{ idrac_inventory["ansible_facts"]["127.0.0.1"]["SystemInventory"]["CPU"] | list }}'
-  #   no_log: true
-
-  # - name: Print number of vCPUs
-  #   ansible.builtin.debug:
-  #     msg: '{{ total_vcpu }}'               
-
-  # - name: Print inventory CPU Cores
-  #   ansible.builtin.debug:
-  #     msg: '{{ idrac_inventory["ansible_facts"]["127.0.0.1"]["SystemInventory"]["CPU"][0]["NumberOfProcessorCores"] }}'  
-
-  - name: Calculate sum of CPU Cores in all CPUs
+  - name: Get 25G NICs MAC addresses & names in form of dict with key=NIC_name and value=NIC_MAC
     set_fact:
-      # split by space the Size value for each DIMM, element of the "Memory" key in dictionary, like "16.0 GB", and get interger part, then add to a sum defaulted to 0
-      total_cores: '{{ total_cores |default(0) |int + item["NumberOfProcessorCores"] |int }}'
-    loop: '{{ idrac_inventory["ansible_facts"]["127.0.0.1"]["SystemInventory"]["CPU"] | list }}'
-    no_log: true
-  - name: Print sum of CPU Cores 
-    ansible.builtin.debug:
-      msg: '{{ total_cores }}'               
-
-  - name: Calculate sum of RAM capacity in all DIMM slots
-    set_fact:
-      # split by space the Size value for each DIMM, element of the "Memory" key in dictionary, like "16.0 GB", and get interger part, then add to a sum defaulted to 0
-      total_ram: '{{ total_ram |default(0) |int + item["Size"].split(" ")[0] |int }}'
-    loop: '{{ idrac_inventory["ansible_facts"]["127.0.0.1"]["SystemInventory"]["Memory"] | list }}'
-    no_log: true
-  - name: Print sum of RAM Memory
-    ansible.builtin.debug:
-      msg: '{{ total_ram }}'               
-
-  - name: Get list of 25G NICs MAC addresses & names
-    set_fact:
-      # create a list default to no elements, in which first element is the MAC and second is NIC name, for each NIC with Speed of 25G
-      nics_list: "{{ nics_list | default([]) | union([item['PermanentMACAddress'], item['DeviceDescription']]) }}"
+      nics_dict: "{{ nics_dict | default({}) | combine ({ item['DeviceDescription'] : item['PermanentMACAddress'] })  }}"      
     when: 
       - ' item["LinkSpeed"] == "25 Gbps"'
     loop: '{{ idrac_inventory["ansible_facts"]["127.0.0.1"]["SystemInventory"]["NIC"] | list }}'
-    no_log: true    
+    no_log: true       
+
+  - name: Get dict with key=server_hostname and value=dict of key=NIC_name and value=NIC_MAC
+    set_fact:
+      # create a dict with key=hostname and value=dict of key=NIC_name and value=NIC_MAC
+      nics_host_dict: "{{ nics_host_dict | default({}) | combine ({ inventory_hostname: nics_dict }) }}"
+    no_log: true 
+
   - name: Print 25G NICs MAC addresses & names
     ansible.builtin.debug:
-      msg: '{{ nics_list }}'     
-
+      msg: '{{ nics_host_dict }}' 
 
 ## Inventory returned:
 # boburciu@WX-5CG020BDT2:~/dell-ansible-automation$ ansible-playbook -i neo_hosts.yml --limit Dell_Ceph_server-1 dellemc_get_system_inventory.yml -e 'ansible_python_interpreter="/usr/bin/python3"' -v
