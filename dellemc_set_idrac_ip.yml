@@ -1,0 +1,31 @@
+## How to run:
+## boburciu@WX-5CG020BDT2:~/dell-ansible-automation$ ansible-playbook -i neo_hosts_static_ip.yml --limit Dell_Compute-7 dellemc_set_idrac_ip.yml -e 'ansible_python_interpreter="/usr/bin/python3"' -v
+## boburciu@WX-5CG020BDT2:~/dell-ansible-automation$ head -2 neo_hosts_static_ip.yml
+# [idrac]
+# Dell_Control-3   idrac_ip='127.0.0.1'  idrac_port='44336'  idrac_user='root'  idrac_password='****' idrac_set_ip='192.168.70.36' idrac_set_gw='192.168.70.33' idrac_set_mask='255.255.255.0'
+
+
+---
+- hosts: idrac
+  connection: local
+  name: Configure static IP (address, gateway, subnet mask, DNS server)
+  gather_facts: False
+
+  collections:
+    - dellemc.openmanage
+
+  tasks:
+  - name: Configure iDRAC network settings
+    dellemc.openmanage.idrac_network:
+        idrac_ip: "{{ idrac_ip }}"
+        idrac_user: "{{ idrac_user }}"
+        idrac_password:  "{{ idrac_password }}"
+        idrac_port:   "{{ idrac_port }}"       
+        ip_address: "{{ idrac_set_ip }}"
+        enable_dhcp: Disabled
+        enable_ipv4: Enabled
+        static_dns_1: "8.8.8.8"
+        dns_from_dhcp: Enabled
+        static_gateway: "{{ idrac_set_gw }}"
+        static_net_mask: "{{ idrac_set_mask }}"
+        share_name: "{{ playbook_dir }}"
