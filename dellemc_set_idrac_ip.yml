@@ -28,4 +28,4 @@
         dns_from_dhcp: Enabled
         static_gateway: "{{ idrac_set_gw }}"
         static_net_mask: "{{ idrac_set_mask }}"
-        share_name: "{{ playbook_dir }}"
+        share_name: "{{ playbook_dir }}"  # required, per https://github.com/dell/dellemc-openmanage-ansible-modules/blob/collections/plugins/modules/idrac_network.py
