@@ -29,5 +29,5 @@
 
   - name: Print inventory System Model
     ansible.builtin.debug:
-      msg: '{{ idrac_inventory["ansible_facts"]["127.0.0.1"]["SystemInventory"]["System"][0]["ServiceTag"] }}'
+      msg: '{{ idrac_inventory["ansible_facts"]["127.0.0.1"]["SystemInventory"]["System"][0]["Model"] }}'
 
