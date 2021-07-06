@@ -1,0 +1,43 @@
+## How to run:
+## boburciu@WX-5CG020BDT2:~/dell-ansible-automation$ ansible-playbook -i neo_hosts.yml --limit Dell_Control-3 dellemc_set_idrac_snmp_user.yml -e 'ansible_python_interpreter="/usr/bin/python3" idrac_local_user="NSSO"' -vv
+---
+- hosts: idrac
+  connection: local
+  name: Configure SNMPv3 for a local iDRAC user
+  gather_facts: False
+
+  collections:
+    - dellemc.openmanage
+
+  tasks:
+  - name: Modify existent iDRAC user attributes in iDRAC Settings > Users > Local Users
+    idrac_user:
+       idrac_ip: "{{ idrac_ip }}"
+       idrac_port: "{{ idrac_port }}"
+       idrac_user: "{{ idrac_user }}"
+       idrac_password: "{{ idrac_password }}"
+       user_name: "{{ idrac_local_user }}"
+       #       user_password:
+       privilege: "ReadOnly"
+       ipmi_lan_privilege: "No Access"
+       ipmi_serial_privilege: "No Access"
+       enable: "true"
+       sol_enable: "false"              # Serial Over LAN
+       protocol_enable: "true"
+       authentication_protocol: "SHA"
+       privacy_protocol: "AES"
+#
+#  - name: Setup iDRAC SNMP settings in Configuration > System Settings > Alert Configuration > SNMP Traps Configuration
+#    dellemc_configure_idrac_services:
+#       idrac_ip:   "{{ idrac_ip }}"
+#       idrac_port: "{{ idrac_port }}"
+#       idrac_user: "{{ idrac_user }}"
+#       idrac_password:  "{{ idrac_password }}"
+#       share_name: "{{ playbook_dir }}"
+#       snmp_enable: "Enabled"
+#       snmp_protocol: "All"
+#       ipmi_lan:
+#         community_name: nsso
+#       alert_port: 161
+#       trap_format: SNMPv3
+#
