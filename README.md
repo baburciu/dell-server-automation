@@ -1,4 +1,4 @@
-# Ansible playbooks usage for Dell server automation, based on [Galaxy collection](https://github.com/dell/dellemc-openmanage-ansible-modules)
+# Ansible playbooks usage for Dell server automation, based on [Galaxy collection](https://github.com/dell/dellemc-openmanage-ansible-modules) or Python scripts, based on [iDRAC-Redfish](https://github.com/dell/iDRAC-Redfish-Scripting/blob/master/Redfish%20Python/)
 
 ## 0. How to install Ansible Galaxy collection to correct path:
 boburciu@WX-5CG020BDT2:~$ ` ansible-config list | grep COLLECTIONS_PATHS -C1 ` _# verify default location for the collections, so that the new modules can be read by Ansible cfg_
