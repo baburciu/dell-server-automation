@@ -25,3 +25,28 @@ GetSystemHWInventoryREDFISH_network.main()
 # PartNumber: 06VDPG
 # SerialNumber: MYFLMIT09502FB
 # Status: {'Health': 'OK', 'HealthRollup': 'OK', 'State': 'Enabled'}
+# :
+# - Network port details for NIC.Slot.1-1 -
+
+# ActiveLinkTechnology: Ethernet
+# AssociatedNetworkAddresses: ['40:A6:B7:43:8F:80']
+# CurrentLinkSpeedMbps: 25000
+# Description: Network Port View
+# EEEEnabled: None
+# FlowControlConfiguration: None
+# FlowControlStatus: None
+# Id: NIC.Slot.1-1
+# LinkStatus: Up
+# Name: Network Port View
+# NetDevFuncMaxBWAlloc: [{'MaxBWAllocPercent': None, 'NetworkDeviceFunction': {'@odata.id': '/redfish/v1/Chassis/System.Embedded.1/NetworkAdapters/NIC.Slot.1/NetworkDeviceFunctions/NIC.Slot.1-1-1'}}]
+# NetDevFuncMaxBWAlloc@odata.count: 1
+# NetDevFuncMinBWAlloc: [{'MinBWAllocPercent': None, 'NetworkDeviceFunction': {'@odata.id': '/redfish/v1/Chassis/System.Embedded.1/NetworkAdapters/NIC.Slot.1/NetworkDeviceFunctions/NIC.Slot.1-1-1'}}]
+# NetDevFuncMinBWAlloc@odata.count: 1
+# PhysicalPortNumber: 1
+# Status: {'State': 'Enabled', 'Health': 'OK', 'HealthRollup': 'OK'}
+# SupportedEthernetCapabilities: []
+# SupportedEthernetCapabilities@odata.count: 0
+# SupportedLinkCapabilities: [{'AutoSpeedNegotiation': True, 'LinkNetworkTechnology': 'Ethernet', 'LinkSpeedMbps': 25000}]
+# SupportedLinkCapabilities@odata.count: 1
+# VendorId: 8086
+# WakeOnLANEnabled: None
